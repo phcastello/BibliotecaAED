@@ -1,54 +1,82 @@
 #include <iostream>
+#include <string>
+#include <vector>
 #include "DataStructLib.hpp"
 
-int main() {
-    // Lista encadeada
+// ======================
+// Funções de teste
+// ======================
+
+void testLinkedList() {
+    std::cout << "\n===== TESTE LINKED LIST =====\n";
+
     LinkedList<int> lista;
+
+    std::cout << "Lista está vazia? " << (lista.isEmpty() ? "Sim" : "Não") << "\n";
+
     lista.insertStart(10);
-    lista.insertEnd(20);
-    lista.insertEnd(30);
-    std::cout << "Lista encadeada:\n";
-    lista.imprimeLista();
+    lista.insertStart(20);
+    lista.insertEnd(5);
+    lista.imprimeLista(); // Esperado: 20 10 5
 
-    lista.removeStart();
-    std::cout << "Após remover início:\n";
-    lista.imprimeLista();
+    std::cout << "Removendo do início: " << lista.removeStart() << "\n"; // Esperado: 20
+    lista.imprimeLista(); // Esperado: 10 5
+}
 
-    // Fila
+void testQueue() {
+    std::cout << "\n===== TESTE FILA (QUEUE) =====\n";
+
     Queue<std::string> fila;
-    fila.enqueue("Pedro");
-    fila.enqueue("Ana");
-    fila.enqueue("Lucas");
-    std::cout << "\nFila:\n";
-    fila.printQueue();
-    fila.dequeue();
-    std::cout << "Após dequeue:\n";
-    fila.printQueue();
 
-    // Pilha
+    fila.enqueue("banana");
+    fila.enqueue("maçã");
+    fila.enqueue("laranja");
+    fila.printQueue(); // Esperado: banana maçã laranja
+
+    std::cout << "Removendo da fila: " << fila.dequeue() << "\n"; // Esperado: banana
+    fila.printQueue(); // Esperado: maçã laranja
+}
+
+void testStack() {
+    std::cout << "\n===== TESTE PILHA (STACK) =====\n";
+
     Stack<char> pilha;
+
     pilha.push('A');
     pilha.push('B');
     pilha.push('C');
-    std::cout << "\nPilha:\n";
-    pilha.printStack();
-    pilha.pop();
-    std::cout << "Após pop:\n";
-    pilha.printStack();
+    pilha.printStack(); // Esperado: C B A
 
-    // Fila de prioridade
+    std::cout << "Removendo do topo da pilha: " << pilha.pop() << "\n"; // Esperado: C
+    pilha.printStack(); // Esperado: B A
+}
+
+void testPriorityQueue() {
+    std::cout << "\n===== TESTE FILA DE PRIORIDADE =====\n";
+
     PriorityQueue<std::string> filaPrioridade;
-    filaPrioridade.enqueue("Tarefa urgente", 5);
-    filaPrioridade.enqueue("Tarefa média", 2);
-    filaPrioridade.enqueue("Tarefa comum", 1);
-    filaPrioridade.enqueue("Outra urgente", 5);
 
-    std::cout << "\nFila de Prioridade:\n";
-    filaPrioridade.printQueue();
-    
-    std::cout << "\nRemovendo maior prioridade: " << filaPrioridade.dequeue() << "\n";
-    std::cout << "Após remover:\n";
-    filaPrioridade.printQueue();
+    filaPrioridade.enqueue("Tarefa urgente", 1);
+    filaPrioridade.enqueue("Tarefa média", 5);
+    filaPrioridade.enqueue("Tarefa leve", 10);
+    filaPrioridade.enqueue("Tarefa média (2)", 5);
 
+    auto elementos = filaPrioridade.getAllElements();
+
+    std::cout << "Elementos na fila (esperado ordem por prioridade e chegada):\n";
+    for (auto& e : elementos) {
+        std::cout << "- " << e.getValue()
+                  << " | prioridade: " << e.getPriority()
+                  << " | ordem chegada: " << e.getArrivalOrder() << "\n";
+    }
+
+    std::cout << "Removendo da fila de prioridade: " << filaPrioridade.dequeue() << "\n";
+}
+
+int main() {
+    testLinkedList();
+    testQueue();
+    testStack();
+    testPriorityQueue();
     return 0;
 }
