@@ -281,14 +281,15 @@ public:
         return list.isEmpty();
     }
 
-    // Imprime a fila com prioridades
-    void printQueue() {
-        Node<PrioritizedElement<T>>* element = list.getHead();
-        std::cout << "Fila:\n";
-        while (element != nullptr) {
-            std::cout << "(" << element->getInfo() << ", p=" << element->getInfo().getPriority() << ") \n";
-            element = element->getLink();
+    // Retorna um std::vector com todos os elementos
+    std::vector<PrioritizedElement<T>> getAllElements() const{
+        std::vector<PrioritizedElement<T>> elementos;
+        Node<PrioritizedElement<T>>* atual = list.getHead();
+        while(atual != nullptr){
+            elementos.push_back(atual->getInfo());
+            atual = atual->getLink();
         }
+        return elementos;
     }
 };
 
