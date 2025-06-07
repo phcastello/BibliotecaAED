@@ -1,11 +1,11 @@
 #include <iostream> // Biblioteca padrão para entrada e saída (cin, cout)
-
+#include <vector>
 // ========================
 // Classe Node (Nó da Lista)
 // ========================
 
 template <typename T>
-class Node {
+class Node{
 private:
     T info;            // Valor armazenado no nó (pode ser qualquer tipo)
     Node *link;        // Ponteiro para o próximo nó na lista
@@ -127,7 +127,6 @@ template <typename T>
 class Queue {
 private:
     LinkedList<T> queue; // Usa uma lista encadeada internamente
-
 public:
     // Adiciona no fim da fila
     void enqueue(T x) {
@@ -147,6 +146,10 @@ public:
     // Verifica se a fila está vazia
     bool isEmpty() const {
         return queue.isEmpty();
+    }
+
+    Node<T>* getHead() const{
+        return queue.getHead();
     }
 };
 
@@ -240,8 +243,7 @@ public:
         // Percorre a lista para encontrar a posição correta
         while (atual != nullptr){
             auto infoAtual = atual->getInfo();
-            if (infoAtual.getPriority() > newElement.getPriority()){
-                // A prioridade atual é menor (lembre que menor == mais importante)
+            if (infoAtual.getPriority() < newElement.getPriority()){
                 anterior = atual;
                 atual = atual->getLink();
             }
