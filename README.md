@@ -40,6 +40,7 @@ Observação: escolhas intencionais para fins didáticos. Por exemplo, poderíam
 
 ## Como Usar
 Há duas formas principais de usar a biblioteca:
+
 1 **Recomendado**. Clonar o repositório numa pasta e colocar uma outra pasta com seus arquivos criados no mesmo nível.
 Compile com:
 ```bash
