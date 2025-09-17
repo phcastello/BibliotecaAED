@@ -1,0 +1,748 @@
+diff --git a/README.md b/README.md
+index 4ad3060..89ae570 100644
+--- a/README.md
++++ b/README.md
+@@ -14,14 +14,13 @@ Inclua tudo com `#include <DataStructLib/DataStructLib.hpp>`.
+   - Principais membros: `getInfo()`, `setInfo(...)`, `getLink()`, `setLink(...)`.
+ - `LinkedList<T>`: lista encadeada simples.
+   - Operações: `insertStart(x)`, `insertEnd(x)`, `removeStart()`, `isEmpty()`, `clear()`, `getHead()`, `setHead(...)`.
+-  - Observações: lança `std::runtime_error` ao remover de lista vazia.
+-  - Sem cópia (copy) para evitar dupla liberação; move é permitido.
++  - Observações: lança a mensagem "Lista vazia" ao remover de lista vazia.
++  - Sem cópia (copy) para evitar dupla liberação.
+ - `Stack<T>`: pilha (LIFO) construída sobre `LinkedList<T>`.
+   - Operações: `push(x)`, `pop()`, `isEmpty()`.
+ - `Queue<T>`: fila (FIFO) construída sobre `LinkedList<T>`.
+   - Operações: `enqueue(x)`, `dequeue()`, `isEmpty()`.
+-- `PrioritizedElement<T>`: armazena valor, prioridade (menor número = maior prioridade) e ordem de chegada.
+-- `PriorityQueue<T>`: fila de prioridade estável (desempata pela ordem de chegada).
++- `PriorityQueue<T>`: fila de prioridade estável (desempata pela ordem de chegada) com estrutura interna simples.
+   - Operações: `enqueue(value, priority)`, `dequeue()`, `isEmpty()`.
+ - Mais estruturas de dados serão adicionados com o tempo.
+ 
+@@ -32,6 +31,11 @@ Observação: escolhas intencionais para fins didáticos. Por exemplo, poderíam
+ - `include/DataStructLib/*.hpp`: cabeçalhos públicos da biblioteca.
+ - `.gitignore`: ignora binários e arquivos temporários.
+ - `helloWorld.cpp`: testes abrangentes da API atual sem `using namespace dsl` (forma recomendada).
++- `ROADMAP.md`: planejamento das próximas implementações.
++
++## Roadmap
++
++Para conhecer o planejamento e itens previstos (ex.: listas circulares, listas duplamente encadeadas, etc), consulte o arquivo `ROADMAP.md` na raiz do repositório.
+ 
+ ## Requisitos
+ 
+@@ -57,14 +61,14 @@ g++ -std=c++17 -I include/ seu_arquivo.cpp -o seu_programa
+ O arquivo `helloWorld.cpp` faz testes cobrindo:
+ 
+ - Criação e ligação de nós (`Node<T>`), acessores e mutadores.
+-- Operações de `LinkedList<T>`, inclusive exceção ao remover de lista vazia e operações de move.
+-- Operações de `Stack<T>`, `Queue<T>` e `PriorityQueue<T>` com exemplos de lvalue/rvalue.
++- Operações de `LinkedList<T>`, inclusive erro ao remover de lista vazia.
++- Operações de `Stack<T>`, `Queue<T>` e `PriorityQueue<T>`.
+ - Impressão via `operator<<` e uso consistente de `dsl::` como prefixo.
+ 
+ ## Decisões Didáticas e Limitações
+ 
+ - Ponteiros brutos são usados conscientemente para fixar fundamentos de listas encadeadas.
+-- `LinkedList<T>` desabilita cópia (copy constructor/assignment) para evitar problemas de dupla liberação; move é permitido.
++- `LinkedList<T>` desabilita cópia (copy constructor/assignment) para evitar problemas de dupla liberação.
+ - Tratamento de erros é mínimo e ilustra exceções básicas (ex.: `removeStart` em lista vazia).
+ - Não é thread‑safe nem otimizada para produção; o objetivo é didático.
+ 
+diff --git a/helloWorld.cpp b/helloWorld.cpp
+index c7064ed..289d79d 100644
+--- a/helloWorld.cpp
++++ b/helloWorld.cpp
+@@ -1,145 +1,81 @@
+-// Exercício: testar todas as funcionalidades disponíveis da biblioteca didática
+ #include <DataStructLib/DataStructLib.hpp>
+ #include <iostream>
+-#include <string>
+-
+-// É possível usar "using namespace dsl;" para evitar o dsl::, mas, de modo geral, evite.
+-// O uso explícito de dsl:: ajuda a deixar claro o que é da biblioteca e o que é do usuário.
+-// O mesmo vale para std::, que é o namespace da STL. Tambem evite usar "using namespace std;".
+ 
++template <typename T>
++static void printLinkedList(const dsl::LinkedList<T>& list) {
++    const dsl::Node<T>* current = list.getHead();
++    std::cout << "Itens da lista: ";
++    while (current != nullptr) {
++        std::cout << current->getInfo() << ' ';
++        current = current->getLink();
++    }
++    std::cout << '\n';
++}
+ 
+ int main() {
+     std::cout << "Hello, DataStructLib!\n";
+-    std::cout << "=== DataStructLib Teste Abrangente ===\n";
+     std::cout << "Versao: " << DATASTRUCTLIB_VERSION_STR << "\n\n";
+ 
+-    // Teste Node<T>
+-    {
+-        std::cout << "[Node]" << '\n';
+-        dsl::Node<int> n1;                // default
+-        dsl::Node<int> n2(42);            // com valor
+-        dsl::Node<int> n3(100, &n2);      // com valor e proximo
+-
+-        n1.setInfo(7);
+-        n1.setLink(&n3);
+-        int tmp = 55; n2.setInfo(tmp);          // lvalue
+-        std::string s = "abc"; (void)s;        // apenas para variar
+-        int tmp2 = 99; n2.setInfo(std::move(tmp2)); // rvalue
+-
+-        std::cout << "n1.info=" << n1.getInfo()
+-                  << ", n2.info=" << n2.getInfo()
+-                  << ", n3.info=" << n3.getInfo() << '\n';
+-        std::cout << "n1->n3->n2 encadeado? "
+-                  << ((n1.getLink() && n1.getLink()->getLink()==&n2) ? "sim" : "nao")
+-                  << "\n\n";
+-    }
+-
+-    // Teste LinkedList<T>
+-    {
+-        std::cout << "[LinkedList]" << '\n';
+-        dsl::LinkedList<int> lista;
+-        std::cout << "vazia? " << (lista.isEmpty() ? "sim" : "nao") << '\n';
+-
+-        int a = 2; lista.insertStart(a);   // lvalue
+-        lista.insertStart(1);              // rvalue literal
+-        int b = 5; lista.insertEnd(b);     // lvalue
+-        int c = 7; lista.insertEnd(std::move(c)); // rvalue
+-
+-        std::cout << lista << '\n';
+-
+-        // removeStart + excecao
+-        int first = lista.removeStart();
+-        std::cout << "removeStart=" << first << "; depois: " << lista << '\n';
+-
+-        // getHead / setHead
+-        if (auto* head = lista.getHead()) {
+-            std::cout << "head.info (antes)=" << head->getInfo() << '\n';
+-            head->setInfo(999);
+-            std::cout << "head.info (depois)=" << head->getInfo() << '\n';
+-        }
+-        // Inserir um nó manualmente ao inicio usando setHead
+-        auto* extra = new dsl::Node<int>(-1, lista.getHead());
+-        lista.setHead(extra);
+-        std::cout << "apos setHead(extra): " << lista << '\n';
+-
+-        // const getHead (observador const)
+-        const dsl::LinkedList<int>& cref = lista;
+-        if (auto* ch = cref.getHead()) {
+-            std::cout << "const head.info=" << ch->getInfo() << '\n';
+-        }
+-
+-        // clear()
+-        lista.clear();
+-        std::cout << "apos clear, vazia? " << (lista.isEmpty() ? "sim" : "nao") << '\n';
+-
+-        // Excecao ao remover de lista vazia
+-        try {
+-            (void)lista.removeStart();
+-            std::cout << "ERRO: era para lancar excecao em lista vazia" << '\n';
+-        } catch (const std::runtime_error& e) {
+-            std::cout << "ok, excecao capturada: " << e.what() << '\n';
+-        }
+-
+-        // Move constructor/assignment
+-        dsl::LinkedList<std::string> l1;
+-        l1.insertEnd("A"); l1.insertEnd("B");
+-        dsl::LinkedList<std::string> l2(std::move(l1)); // move ctor
+-        std::cout << "l2 (apos move ctor): " << l2 << '\n';
+-        std::cout << "l1 (apos move ctor), vazia? " << (l1.isEmpty()?"sim":"nao") << '\n';
+-        dsl::LinkedList<std::string> l3; l3.insertStart("X");
+-        l3 = std::move(l2); // move assign
+-        std::cout << "l3 (apos move assign): " << l3 << '\n';
+-        std::cout << "l2 (apos move assign), vazia? " << (l2.isEmpty()?"sim":"nao") << '\n';
+-        std::cout << '\n';
++    // Teste básico de Node
++    dsl::Node<int> n1;
++    dsl::Node<int> n2(42);
++    n1.setInfo(7);
++    n1.setLink(&n2);
++    std::cout << "n1.info=" << n1.getInfo() << " n2.info=" << n1.getLink()->getInfo() << "\n\n";
++
++    // LinkedList simples
++    dsl::LinkedList<int> lista;
++    lista.insertStart(2);
++    lista.insertStart(1);
++    lista.insertEnd(3);
++    printLinkedList(lista);
++    std::cout << "removeStart=" << lista.removeStart() << '\n';
++    printLinkedList(lista);
++
++    lista.clear();
++    std::cout << "lista vazia? " << (lista.isEmpty() ? "sim" : "nao") << '\n';
++    try {
++        lista.removeStart();
++    } catch (const char* msg) {
++        std::cout << "falha ao remover: " << msg << '\n';
+     }
+-
+-    // Teste Stack<T>
+-    {
+-        std::cout << "[Stack]" << '\n';
+-        dsl::Stack<std::string> pilha;
+-        pilha.push("A");
+-        std::string s = "B";pilha.push(s);     // lvalue
+-        pilha.push(std::string("C"));           // rvalue
+-        std::cout << "pop1=" << pilha.pop() << '\n';
+-        std::cout << "pop2=" << pilha.pop() << '\n';
+-        std::cout << "vazia? " << (pilha.isEmpty()?"sim":"nao") << '\n';
+-        std::cout << '\n';
++    std::cout << '\n';
++
++    // Pilha
++    dsl::Stack<int> pilha;
++    pilha.push(10);
++    pilha.push(20);
++    std::cout << "pop1=" << pilha.pop() << '\n';
++    std::cout << "pop2=" << pilha.pop() << '\n';
++    std::cout << "pilha vazia? " << (pilha.isEmpty() ? "sim" : "nao") << "\n\n";
++
++    // Fila
++    dsl::Queue<int> fila;
++    fila.enqueue(5);
++    fila.enqueue(6);
++    std::cout << "dequeue1=" << fila.dequeue() << '\n';
++    std::cout << "dequeue2=" << fila.dequeue() << '\n';
++    std::cout << "fila vazia? " << (fila.isEmpty() ? "sim" : "nao") << "\n\n";
++
++    // Fila de prioridade
++    dsl::PriorityQueue<int> prioridade;
++    prioridade.enqueue(30, 2);
++    prioridade.enqueue(10, 1);
++    prioridade.enqueue(20, 2);
++    while (!prioridade.isEmpty()) {
++        std::cout << "priority dequeue -> " << prioridade.dequeue() << '\n';
+     }
++    std::cout << '\n';
+ 
+-    // Teste Queue<T>
+-    {
+-        std::cout << "[Queue]" << '\n';
+-        dsl::Queue<int> fila;
+-        int x = 10; fila.enqueue(x);       // lvalue
+-        fila.enqueue(20);                   // rvalue
+-        if (auto* h = fila.getHead()) {
+-            std::cout << "head.info=" << h->getInfo() << '\n';
+-        }
+-        std::cout << "dequeue1=" << fila.dequeue() << '\n';
+-        std::cout << "dequeue2=" << fila.dequeue() << '\n';
+-        std::cout << "vazia? " << (fila.isEmpty()?"sim":"nao") << '\n';
+-        std::cout << '\n';
+-    }
++    // Lista circular
++    dsl::CircularLinkedList<int> circular;
++    circular.insertEnd(100);
++    circular.insertEnd(200);
++    circular.insertStart(50);
++    std::cout << "circular remove inicio=" << circular.removeStart() << '\n';
++    std::cout << "circular remove fim=" << circular.removeEnd() << '\n';
++    std::cout << "circular vazia? " << (circular.isEmpty() ? "sim" : "nao") << '\n';
+ 
+-    // Teste PrioritizedElement<T> e PriorityQueue<T>
+-    {
+-        std::cout << "[PrioritizedElement / PriorityQueue]" << '\n';
+-        dsl::PrioritizedElement<int> pe(42, 3, 7);
+-        std::cout << "PrioritizedElement imprime apenas valor: " << pe << '\n';
+-        std::cout << "priority=" << pe.getPriority() << ", arrival=" << pe.getArrivalOrder() << '\n';
+-
+-        dsl::PriorityQueue<std::string> fp;
+-        fp.enqueue("tarefa media", 5);
+-        fp.enqueue("tarefa alta", 1);
+-        fp.enqueue("tarefa alta 2", 1); // estabilidade: chega depois, mesma prioridade
+-        fp.enqueue("tarefa baixa", 9);
+-
+-        while (!fp.isEmpty()) {
+-            std::cout << "PQ.dequeue -> " << fp.dequeue() << '\n';
+-        }
+-        std::cout << '\n';
+-    }
+-
+-    std::cout << "=== Fim dos testes ===\n";
+     return 0;
+ }
++
+diff --git a/include/DataStructLib/DataStructLib.hpp b/include/DataStructLib/DataStructLib.hpp
+index c137b30..3687cda 100644
+--- a/include/DataStructLib/DataStructLib.hpp
++++ b/include/DataStructLib/DataStructLib.hpp
+@@ -4,8 +4,8 @@
+ #include "version.hpp"
+ #include "node.hpp"
+ #include "linked_list.hpp"
++#include "circular_linked_list.hpp"
+ #include "queue.hpp"
+ #include "stack.hpp"
+-#include "prioritized_element.hpp"
+ #include "priority_queue.hpp"
+-#include "ostream.hpp"
++
+diff --git a/include/DataStructLib/linked_list.hpp b/include/DataStructLib/linked_list.hpp
+index 2cc8c4e..206b9c0 100644
+--- a/include/DataStructLib/linked_list.hpp
++++ b/include/DataStructLib/linked_list.hpp
+@@ -1,21 +1,21 @@
+ #pragma once
+-#include <iostream>
+-#include <stdexcept>
+ #include "node.hpp"
+ 
+-// Aqui criamos um namespace, assim falamos para o compilador que quem estiver usando a bilioteca, quer 
+-// usar as classes que estão dentro do namespace dsl (Data Struct Lib), evitando conflitos de nomes.
+ namespace dsl {
+ 
+-// Lista encadeada simples (didática)
++    
+ template <typename T>
+ class LinkedList {
+ private:
+-    Node<T>* head_; // ponteiro para o primeiro nó
++    Node<T>* head_;
+ 
+ public:
+-    // Observadores básicos
+-    Node<T>* getHead(){
++    LinkedList() : head_(nullptr) {}
++    LinkedList(const LinkedList&) = delete;
++    LinkedList& operator=(const LinkedList&) = delete;
++    ~LinkedList() { clear(); }
++
++    Node<T>* getHead() {
+         return head_;
+     }
+     const Node<T>* getHead() const {
+@@ -25,37 +25,12 @@ public:
+         head_ = h;
+     }
+ 
+-
+-    // A parte de construtores e destrutores do c++ é um pouco chata e relativamente difícil de compreender.
+-    // Portanto, a parte de construtores e destrutores pode ficar para os curiosos.
+-
+-    // Construtor / Destrutor
+-    LinkedList() : head_(nullptr) {}
+-
+-    // Regra dos 5 – simples e didática: proibimos cópia para evitar dupla liberação
+-    LinkedList(const LinkedList&) = delete;
+-    LinkedList& operator=(const LinkedList&) = delete;
+-
+-    // Permitimos move para facilitar retornos por valor
+-    LinkedList(LinkedList&& other) noexcept : head_(other.head_) { other.head_ = nullptr; }
+-    LinkedList& operator=(LinkedList&& other) noexcept {
+-        if (this != &other) {
+-            clear();
+-            head_ = other.head_;
+-            other.head_ = nullptr;
+-        }
+-        return *this;
+-    }
+-
+-    ~LinkedList() {clear(); }
+-
+-    // Limpa a lista, liberando memória
+     void clear() {
+-        Node<T>* p = head_;
+-        while (p != nullptr) {
+-            Node<T>* tmp = p;
+-            p = p->getLink();
+-            delete tmp;
++        Node<T>* current = head_;
++        while (current != nullptr) {
++            Node<T>* next = current->getLink();
++            delete current;
++            current = next;
+         }
+         head_ = nullptr;
+     }
+@@ -64,41 +39,37 @@ public:
+         return head_ == nullptr;
+     }
+ 
+-    // Insere no início. Overloads para cópia e movimento.
+-    void insertStart(const T& x) {
+-        Node<T>* n = new Node<T>(x, head_);
+-        head_ = n;
++    void insertStart(const T& value) {
++        Node<T>* node = new Node<T>(value, head_);
++        head_ = node;
+     }
+-    void insertStart(T&& x) {
+-        Node<T>* n = new Node<T>(std::move(x), head_);
+-        head_ = n;
++
++    void insertEnd(const T& value) {
++        Node<T>* node = new Node<T>(value, nullptr);
++        if (head_ == nullptr) {
++            head_ = node;
++            return;
++        }
++
++        Node<T>* current = head_;
++        while (current->getLink() != nullptr) {
++            current = current->getLink();
++        }
++        current->setLink(node);
+     }
+ 
+-    // Remove do início e retorna o valor
+     T removeStart() {
+-        if (isEmpty()) throw std::runtime_error("Lista vazia");
+-        Node<T>* old = head_;
+-        T value = std::move(old->getInfo());
+-        head_ = old->getLink();
+-        delete old;
+-        return value;
+-    }
++        if (isEmpty()) {
++            throw "Lista vazia";
++        }
+ 
+-    // Insere no fim. Overloads para cópia e movimento também.
+-    void insertEnd(const T& x) {
+-        Node<T>* n = new Node<T>(x, nullptr);
+-        if (isEmpty()) { head_ = n; return; }
+-        Node<T>* p = head_;
+-        while (p->getLink() != nullptr) p = p->getLink();
+-        p->setLink(n);
+-    }
+-    void insertEnd(T&& x) {
+-        Node<T>* n = new Node<T>(std::move(x), nullptr);
+-        if (isEmpty()) { head_ = n; return; }
+-        Node<T>* p = head_;
+-        while (p->getLink() != nullptr) p = p->getLink();
+-        p->setLink(n);
++        Node<T>* oldHead = head_;
++        T value = oldHead->getInfo();
++        head_ = oldHead->getLink();
++        delete oldHead;
++        return value;
+     }
+ };
+ 
+ } // namespace dsl
++
+diff --git a/include/DataStructLib/node.hpp b/include/DataStructLib/node.hpp
+index 8cf60ad..1893e8e 100644
+--- a/include/DataStructLib/node.hpp
++++ b/include/DataStructLib/node.hpp
+@@ -1,9 +1,8 @@
+ #pragma once
+-#include <utility>
+ 
+ namespace dsl {
+ 
+-// Nó da lista encadeada (didático, usa ponteiros brutos de propósito)
++// Nó de lista encadeada usando ponteiros simples
+ template <typename T>
+ class Node {
+ private:
+@@ -11,35 +10,31 @@ private:
+     Node* link;
+ 
+ public:
+-    // Construtores
+     Node() : info(), link(nullptr) {}
+     Node(const T& value, Node* next = nullptr) : info(value), link(next) {}
+-    Node(T&& value, Node* next = nullptr) : info(std::move(value)), link(next) {}
+ 
+-    // Acessores
+-    T& getInfo(){
++    T& getInfo() {
+         return info;
+     }
+     const T& getInfo() const {
+         return info;
+     }
+ 
+-    void setInfo(const T& v){
++    void setInfo(const T& v) {
+         info = v;
+     }
+-    void setInfo(T&& v){
+-        info = std::move(v);
+-    }
+ 
+-    Node* getLink(){
++    Node* getLink() {
+         return link;
+     }
+     const Node* getLink() const {
+         return link;
+     }
+-    void setLink(Node* n){
++
++    void setLink(Node* n) {
+         link = n;
+     }
+ };
+ 
+ }
++
+diff --git a/include/DataStructLib/ostream.hpp b/include/DataStructLib/ostream.hpp
+deleted file mode 100644
+index a732ab1..0000000
+--- a/include/DataStructLib/ostream.hpp
++++ /dev/null
+@@ -1,27 +0,0 @@
+-#pragma once
+-#include <ostream>
+-#include "linked_list.hpp"
+-#include "prioritized_element.hpp"
+-
+-namespace dsl {
+-
+-// Mostra apenas o valor para PrioritizedElement<T>
+-template <typename T>
+-inline std::ostream& operator<<(std::ostream& os, const PrioritizedElement<T>& elem) {
+-    os << elem.getValue();
+-    return os;
+-}
+-
+-// Imprime elementos de uma LinkedList<T>
+-template <typename T>
+-inline std::ostream& operator<<(std::ostream& os, const LinkedList<T>& list) {
+-    const Node<T>* current = list.getHead();
+-    os << "Itens da lista: ";
+-    while (current != nullptr) {
+-        os << current->getInfo() << ' ';
+-        current = current->getLink();
+-    }
+-    return os;
+-}
+-
+-} // namespace dsl
+diff --git a/include/DataStructLib/prioritized_element.hpp b/include/DataStructLib/prioritized_element.hpp
+deleted file mode 100644
+index 9cece86..0000000
+--- a/include/DataStructLib/prioritized_element.hpp
++++ /dev/null
+@@ -1,23 +0,0 @@
+-#pragma once
+-
+-namespace dsl {
+-
+-// Elemento com prioridade e ordem de chegada (para desempate estável)
+-template <typename T>
+-class PrioritizedElement {
+-private:
+-    T value;
+-    unsigned int priority;  // menor número = maior prioridade
+-    std::size_t arrivalOrder;
+-
+-public:
+-    PrioritizedElement() : value(), priority(0), arrivalOrder(0) {}
+-    PrioritizedElement(const T& v, unsigned int p, std::size_t order)
+-        : value(v), priority(p), arrivalOrder(order) {}
+-
+-    const T& getValue() const { return value; }
+-    unsigned int getPriority() const { return priority; }
+-    std::size_t getArrivalOrder() const { return arrivalOrder; }
+-};
+-
+-} // namespace dsl
+diff --git a/include/DataStructLib/priority_queue.hpp b/include/DataStructLib/priority_queue.hpp
+index 344d3c6..2099f22 100644
+--- a/include/DataStructLib/priority_queue.hpp
++++ b/include/DataStructLib/priority_queue.hpp
+@@ -1,56 +1,62 @@
+ #pragma once
+-#include <cstddef>
+ #include "linked_list.hpp"
+-#include "prioritized_element.hpp"
+ 
+ namespace dsl {
+ 
+-// Fila de prioridade estável (ordena por prioridade e, em empate, por ordem de chegada)
+ template <typename T>
+ class PriorityQueue {
+ private:
+-    LinkedList<PrioritizedElement<T>> list_;
+-    std::size_t counter_ {0}; // ordem de chegada
++    struct Entry {
++        T value;
++        unsigned int priority;
++        unsigned long arrivalOrder;
++
++        Entry() : value(), priority(0), arrivalOrder(0) {}
++        Entry(const T& v, unsigned int p, unsigned long order)
++            : value(v), priority(p), arrivalOrder(order) {}
++    };
++
++    LinkedList<Entry> list_;
++    unsigned long counter_;
+ 
+ public:
+-    PriorityQueue() = default;
++    PriorityQueue() : counter_(0) {}
+ 
+     void enqueue(const T& value, unsigned int priority) {
+-        PrioritizedElement<T> elem(value, priority, counter_++);
+-        // Encontrar posição de inserção
+-        Node<PrioritizedElement<T>>* prev = nullptr;
+-        Node<PrioritizedElement<T>>* cur  = list_.getHead();
+-
+-        while (cur != nullptr) {
+-            const auto& info = cur->getInfo();
+-            const bool lowerPriority = (info.getPriority() < elem.getPriority()); // número menor = maior prioridade
+-            const bool samePriorityEarlier = (info.getPriority() == elem.getPriority())
+-                                           && (info.getArrivalOrder() < elem.getArrivalOrder());
++        Entry element(value, priority, counter_++);
++
++        Node<Entry>* previous = nullptr;
++        Node<Entry>* current = list_.getHead();
++
++        while (current != nullptr) {
++            const Entry& info = current->getInfo();
++            bool lowerPriority = info.priority < element.priority;
++            bool samePriorityEarlier = info.priority == element.priority
++                                     && info.arrivalOrder < element.arrivalOrder;
+             if (lowerPriority || samePriorityEarlier) {
+-                prev = cur;
+-                cur  = cur->getLink();
++                previous = current;
++                current = current->getLink();
+             } else {
+                 break;
+             }
+         }
+ 
+-        // Inserir novo nó
+-        auto* newNode = new Node<PrioritizedElement<T>>(elem, cur);
+-        if (prev == nullptr) {
+-            // início
++        Node<Entry>* newNode = new Node<Entry>(element, current);
++        if (previous == nullptr) {
+             list_.setHead(newNode);
+-        }
+-        else {
+-            prev->setLink(newNode);
++        } else {
++            previous->setLink(newNode);
+         }
+     }
+ 
+     T dequeue() {
+-        // elemento de maior prioridade está no início
+-        return list_.removeStart().getValue();
++        Entry removed = list_.removeStart();
++        return removed.value;
+     }
+ 
+-    bool isEmpty() const { return list_.isEmpty(); }
++    bool isEmpty() const {
++        return list_.isEmpty();
++    }
+ };
+ 
+ }
+diff --git a/include/DataStructLib/queue.hpp b/include/DataStructLib/queue.hpp
+index a04d453..4bc2f82 100644
+--- a/include/DataStructLib/queue.hpp
++++ b/include/DataStructLib/queue.hpp
+@@ -3,22 +3,17 @@
+ 
+ namespace dsl {
+ 
+-// Fila (FIFO) construída sobre LinkedList
+ template <typename T>
+ class Queue {
+ private:
+     LinkedList<T> queue_;
+ 
+ public:
+-    void enqueue(const T& x){
+-        queue_.insertEnd(x);
++    void enqueue(const T& value) {
++        queue_.insertEnd(value);
+     }
+ 
+-    void enqueue(T&& x){
+-        queue_.insertEnd(std::move(x));
+-    }
+-
+-    T dequeue(){
++    T dequeue() {
+         return queue_.removeStart();
+     }
+ 
+@@ -26,17 +21,13 @@ public:
+         return queue_.isEmpty();
+     }
+ 
+-    void printQueue() const {
+-        queue_.imprimeLista();
+-    }
+-
+-    Node<T>* getHead(){
++    Node<T>* getHead() {
+         return queue_.getHead();
+     }
+     const Node<T>* getHead() const {
+         return queue_.getHead();
+     }
+-    
+ };
+ 
+-} // namespace dsl
++}
++
+diff --git a/include/DataStructLib/stack.hpp b/include/DataStructLib/stack.hpp
+index 3e8df9e..e1e0092 100644
+--- a/include/DataStructLib/stack.hpp
++++ b/include/DataStructLib/stack.hpp
+@@ -3,31 +3,24 @@
+ 
+ namespace dsl {
+ 
+-// Pilha (LIFO) construída sobre LinkedList
+ template <typename T>
+ class Stack {
+ private:
+     LinkedList<T> stack_;
+ 
+ public:
+-    void push(const T& x){
+-        stack_.insertStart(x);
+-    }
+-    void push(T&& x){
+-        stack_.insertStart(std::move(x));
++    void push(const T& value) {
++        stack_.insertStart(value);
+     }
+ 
+-    T pop(){
++    T pop() {
+         return stack_.removeStart();
+     }
+ 
+     bool isEmpty() const {
+         return stack_.isEmpty();
+     }
+-
+-    void printStack() const {
+-        stack_.imprimeLista();
+-    }
+ };
+ 
+-} // namespace dsl
++}
++
+diff --git a/include/DataStructLib/version.hpp b/include/DataStructLib/version.hpp
+index 3d26864..95d5848 100644
+--- a/include/DataStructLib/version.hpp
++++ b/include/DataStructLib/version.hpp
+@@ -1,6 +1,7 @@
+ #pragma once
+ // Versão da biblioteca (pode ser configurada via CMake futuramente)
+-#define DATASTRUCTLIB_VERSION_MAJOR 1
++#define DATASTRUCTLIB_VERSION_MAJOR 2
+ #define DATASTRUCTLIB_VERSION_MINOR 0
+ #define DATASTRUCTLIB_VERSION_PATCH 0
+-#define DATASTRUCTLIB_VERSION_STR "1.0.0"
++#define DATASTRUCTLIB_VERSION_STR "2.0.0"
++

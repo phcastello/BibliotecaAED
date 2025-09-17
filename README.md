@@ -14,14 +14,13 @@ Inclua tudo com `#include <DataStructLib/DataStructLib.hpp>`.
   - Principais membros: `getInfo()`, `setInfo(...)`, `getLink()`, `setLink(...)`.
 - `LinkedList<T>`: lista encadeada simples.
   - Operações: `insertStart(x)`, `insertEnd(x)`, `removeStart()`, `isEmpty()`, `clear()`, `getHead()`, `setHead(...)`.
-  - Observações: lança `std::runtime_error` ao remover de lista vazia.
-  - Sem cópia (copy) para evitar dupla liberação; move é permitido.
+  - Observações: lança a mensagem "Lista vazia" ao remover de lista vazia.
+  - Sem cópia (copy) para evitar dupla liberação.
 - `Stack<T>`: pilha (LIFO) construída sobre `LinkedList<T>`.
   - Operações: `push(x)`, `pop()`, `isEmpty()`.
 - `Queue<T>`: fila (FIFO) construída sobre `LinkedList<T>`.
   - Operações: `enqueue(x)`, `dequeue()`, `isEmpty()`.
-- `PrioritizedElement<T>`: armazena valor, prioridade (menor número = maior prioridade) e ordem de chegada.
-- `PriorityQueue<T>`: fila de prioridade estável (desempata pela ordem de chegada).
+- `PriorityQueue<T>`: fila de prioridade estável (desempata pela ordem de chegada) com estrutura interna simples.
   - Operações: `enqueue(value, priority)`, `dequeue()`, `isEmpty()`.
 - Mais estruturas de dados serão adicionados com o tempo.
 
@@ -32,6 +31,11 @@ Observação: escolhas intencionais para fins didáticos. Por exemplo, poderíam
 - `include/DataStructLib/*.hpp`: cabeçalhos públicos da biblioteca.
 - `.gitignore`: ignora binários e arquivos temporários.
 - `helloWorld.cpp`: testes abrangentes da API atual sem `using namespace dsl` (forma recomendada).
+- `ROADMAP.md`: planejamento das próximas implementações.
+
+## Roadmap
+
+Para conhecer o planejamento e itens previstos (ex.: listas circulares, listas duplamente encadeadas, etc), consulte o arquivo `ROADMAP.md` na raiz do repositório.
 
 ## Requisitos
 
@@ -57,14 +61,14 @@ g++ -std=c++17 -I include/ seu_arquivo.cpp -o seu_programa
 O arquivo `helloWorld.cpp` faz testes cobrindo:
 
 - Criação e ligação de nós (`Node<T>`), acessores e mutadores.
-- Operações de `LinkedList<T>`, inclusive exceção ao remover de lista vazia e operações de move.
-- Operações de `Stack<T>`, `Queue<T>` e `PriorityQueue<T>` com exemplos de lvalue/rvalue.
+- Operações de `LinkedList<T>`, inclusive erro ao remover de lista vazia.
+- Operações de `Stack<T>`, `Queue<T>` e `PriorityQueue<T>`.
 - Impressão via `operator<<` e uso consistente de `dsl::` como prefixo.
 
 ## Decisões Didáticas e Limitações
 
 - Ponteiros brutos são usados conscientemente para fixar fundamentos de listas encadeadas.
-- `LinkedList<T>` desabilita cópia (copy constructor/assignment) para evitar problemas de dupla liberação; move é permitido.
+- `LinkedList<T>` desabilita cópia (copy constructor/assignment) para evitar problemas de dupla liberação.
 - Tratamento de erros é mínimo e ilustra exceções básicas (ex.: `removeStart` em lista vazia).
 - Não é thread‑safe nem otimizada para produção; o objetivo é didático.
 

@@ -1,56 +1,62 @@
 #pragma once
-#include <cstddef>
 #include "linked_list.hpp"
-#include "prioritized_element.hpp"
 
 namespace dsl {
 
-// Fila de prioridade estável (ordena por prioridade e, em empate, por ordem de chegada)
 template <typename T>
 class PriorityQueue {
 private:
-    LinkedList<PrioritizedElement<T>> list_;
-    std::size_t counter_ {0}; // ordem de chegada
+    struct Entry {
+        T value;
+        unsigned int priority;
+        unsigned long arrivalOrder;
+
+        Entry() : value(), priority(0), arrivalOrder(0) {}
+        Entry(const T& v, unsigned int p, unsigned long order)
+            : value(v), priority(p), arrivalOrder(order) {}
+    };
+
+    LinkedList<Entry> list_;
+    unsigned long counter_;
 
 public:
-    PriorityQueue() = default;
+    PriorityQueue() : counter_(0) {}
 
     void enqueue(const T& value, unsigned int priority) {
-        PrioritizedElement<T> elem(value, priority, counter_++);
-        // Encontrar posição de inserção
-        Node<PrioritizedElement<T>>* prev = nullptr;
-        Node<PrioritizedElement<T>>* cur  = list_.getHead();
+        Entry element(value, priority, counter_++);
 
-        while (cur != nullptr) {
-            const auto& info = cur->getInfo();
-            const bool lowerPriority = (info.getPriority() < elem.getPriority()); // número menor = maior prioridade
-            const bool samePriorityEarlier = (info.getPriority() == elem.getPriority())
-                                           && (info.getArrivalOrder() < elem.getArrivalOrder());
+        Node<Entry>* previous = nullptr;
+        Node<Entry>* current = list_.getHead();
+
+        while (current != nullptr) {
+            const Entry& info = current->getInfo();
+            bool lowerPriority = info.priority < element.priority;
+            bool samePriorityEarlier = info.priority == element.priority
+                                     && info.arrivalOrder < element.arrivalOrder;
             if (lowerPriority || samePriorityEarlier) {
-                prev = cur;
-                cur  = cur->getLink();
+                previous = current;
+                current = current->getLink();
             } else {
                 break;
             }
         }
 
-        // Inserir novo nó
-        auto* newNode = new Node<PrioritizedElement<T>>(elem, cur);
-        if (prev == nullptr) {
-            // início
+        Node<Entry>* newNode = new Node<Entry>(element, current);
+        if (previous == nullptr) {
             list_.setHead(newNode);
-        }
-        else {
-            prev->setLink(newNode);
+        } else {
+            previous->setLink(newNode);
         }
     }
 
     T dequeue() {
-        // elemento de maior prioridade está no início
-        return list_.removeStart().getValue();
+        Entry removed = list_.removeStart();
+        return removed.value;
     }
 
-    bool isEmpty() const { return list_.isEmpty(); }
+    bool isEmpty() const {
+        return list_.isEmpty();
+    }
 };
 
 }
