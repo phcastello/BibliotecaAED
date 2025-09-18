@@ -44,6 +44,7 @@ Para conhecer o planejamento e itens previstos (ex.: listas circulares, listas d
 
 ## Como Usar
 Há duas formas principais de usar a biblioteca:
+
 1 **Recomendado**. Clonar o repositório numa pasta e colocar uma outra pasta com seus arquivos criados no mesmo nível.
 Compile com:
 ```bash
