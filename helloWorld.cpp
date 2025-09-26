@@ -1,5 +1,7 @@
 #include <DataStructLib/DataStructLib.hpp>
 #include <iostream>
+#include <vector>
+#include <cstddef>
 
 template <typename T>
 static void printLinkedList(const dsl::LinkedList<T>& list) {
@@ -74,7 +76,48 @@ int main() {
     circular.insertStart(50);
     std::cout << "circular remove inicio=" << circular.removeStart() << '\n';
     std::cout << "circular remove fim=" << circular.removeEnd() << '\n';
-    std::cout << "circular vazia? " << (circular.isEmpty() ? "sim" : "nao") << '\n';
+    std::cout << "circular vazia? " << (circular.isEmpty() ? "sim" : "nao") << "\n\n";
+
+    // Arvore de busca binaria
+    dsl::BST<int> arvore;
+    arvore.insertNode(50);
+    arvore.insertNode(20);
+    arvore.insertNode(70);
+    arvore.insertNode(10);
+    arvore.insertNode(30);
+
+    std::vector<int> inOrderVector = arvore.inOrder();
+    std::cout << "In-Order: ";
+    for (std::size_t i = 0; i < inOrderVector.size(); ++i) {
+        std::cout << inOrderVector[i];
+        if (i + 1 < inOrderVector.size()) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "\n\n";
+
+    std::vector<int> preOrderVector = arvore.preOrder();
+    std::cout << "Pre Ordem: ";
+    for (std::size_t i = 0; i < preOrderVector.size(); ++i) {
+        std::cout << preOrderVector[i];
+        if (i + 1 < preOrderVector.size()) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "\n\n";
+
+    std::vector<int> postOrderVector = arvore.postOrder();
+    std::cout << "Pos Ordem: ";
+    for (std::size_t i = 0; i < postOrderVector.size(); ++i) {
+        std::cout << postOrderVector[i];
+        if (i + 1 < postOrderVector.size()) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "\n\n";
+
+    std::cout << "tem 30? " << (arvore.hasNode(30) ? "sim" : "nao") << '\n';
+    std::cout << "tem 99? " << (arvore.hasNode(99) ? "sim" : "nao") << '\n';
 
     return 0;
 }
