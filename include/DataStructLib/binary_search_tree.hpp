@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <queue>
+#include <random>
+#include <type_traits>
 #include <vector>
 
 #include "bst_node.hpp"
@@ -50,6 +53,32 @@ public:
         return inOrder().size();
     }
 
+    static BST randomIntTree(std::size_t count, int minValue = -100, int maxValue = 100) {
+        static_assert(
+            std::is_constructible_v<T, int>,
+            "BST::randomIntTree requires that T can be constructed from int."
+        );
+
+        BST tree;
+        if (count == 0) {
+            return tree;
+        }
+
+        if (minValue > maxValue) {
+            std::swap(minValue, maxValue);
+        }
+
+        std::random_device rd;
+        std::mt19937 generator(rd());
+        std::uniform_int_distribution<int> distribution(minValue, maxValue);
+
+        for (std::size_t i = 0; i < count; ++i) {
+            tree.insertNode(static_cast<T>(distribution(generator)));
+        }
+
+        return tree;
+    }
+
     bool removeValue(const T& value) {
         auto values = inOrder();
         auto it = std::find(values.begin(), values.end(), value);
@@ -65,6 +94,40 @@ public:
         }
 
         return true;
+    }
+
+    std::vector<std::vector<T>> breadthLevels() const {
+        std::vector<std::vector<T>> levels;
+        if (root_ == nullptr) {
+            return levels;
+        }
+
+        std::queue<const BSTNode<T>*> queue;
+        queue.push(root_);
+
+        while (!queue.empty()) {
+            const std::size_t levelSize = queue.size();
+            std::vector<T> currentLevel;
+            currentLevel.reserve(levelSize);
+
+            for (std::size_t i = 0; i < levelSize; ++i) {
+                const auto* node = queue.front();
+                queue.pop();
+
+                currentLevel.push_back(node->data);
+
+                if (node->left != nullptr) {
+                    queue.push(node->left);
+                }
+                if (node->right != nullptr) {
+                    queue.push(node->right);
+                }
+            }
+
+            levels.push_back(std::move(currentLevel));
+        }
+
+        return levels;
     }
 
     void clear() {
