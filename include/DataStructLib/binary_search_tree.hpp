@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
 #include <vector>
 
 #include "bst_node.hpp"
@@ -8,6 +10,68 @@ namespace dsl {
 
 template <typename T>
 class BST {
+public:
+
+    BST() : root_(nullptr) {}
+    BST(const BST&) = delete;
+    BST& operator=(const BST&) = delete;
+    ~BST() { clear(); }
+
+    BSTNode<T>* getRoot() { return root_; }
+    const BSTNode<T>* getRoot() const { return root_; }
+
+    bool isEmpty() const { return root_ == nullptr; }
+
+    void insertNode(const T& data) { root_ = insertNodeRec(root_, data); }
+
+    std::vector<T> inOrder() const {
+        std::vector<T> ordered;
+        inOrderRec(root_, ordered);
+        return ordered;
+    }
+
+    std::vector<T> preOrder() const {
+        std::vector<T> ordered;
+        preOrderRec(root_, ordered);
+        return ordered;
+    }
+
+    std::vector<T> postOrder() const {
+        std::vector<T> ordered;
+        postOrderRec(root_, ordered);
+        return ordered;
+    }
+
+    bool hasNode(const T& searchData) const {
+        return hasNodeRec(root_, searchData);
+    }
+
+    std::size_t nodeCount() const {
+        return inOrder().size();
+    }
+
+    bool removeValue(const T& value) {
+        auto values = inOrder();
+        auto it = std::find(values.begin(), values.end(), value);
+        if (it == values.end()) {
+            return false;
+        }
+
+        values.erase(it);
+        clear();
+
+        for (const auto& element : values) {
+            insertNode(element);
+        }
+
+        return true;
+    }
+
+    void clear() {
+        clearRec(root_);
+        root_ = nullptr;
+    }
+
 private:
     BSTNode<T>* root_;
 
@@ -74,47 +138,6 @@ private:
         clearRec(node->right);
         delete node;
     }
-
-public:
-    BST() : root_(nullptr) {}
-    BST(const BST&) = delete;
-    BST& operator=(const BST&) = delete;
-    ~BST() { clear(); }
-
-    BSTNode<T>* getRoot() { return root_; }
-    const BSTNode<T>* getRoot() const { return root_; }
-
-    bool isEmpty() const { return root_ == nullptr; }
-
-    void insertNode(const T& data) { root_ = insertNodeRec(root_, data); }
-
-    std::vector<T> inOrder() const {
-        std::vector<T> ordered;
-        inOrderRec(root_, ordered);
-        return ordered;
-    }
-
-    std::vector<T> preOrder() const {
-        std::vector<T> ordered;
-        preOrderRec(root_, ordered);
-        return ordered;
-    }
-
-    std::vector<T> postOrder() const {
-        std::vector<T> ordered;
-        postOrderRec(root_, ordered);
-        return ordered;
-    }
-
-    bool hasNode(const T& searchData) const {
-        return hasNodeRec(root_, searchData);
-    }
-
-    void clear() {
-        clearRec(root_);
-        root_ = nullptr;
-    }
 };
 
 } // namespace dsl
-
