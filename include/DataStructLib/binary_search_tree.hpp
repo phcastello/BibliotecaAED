@@ -53,18 +53,15 @@ public:
         return inOrder().size();
     }
 
-    static BST randomIntTree(std::size_t count, int minValue = -100, int maxValue = 100) {
-        static_assert(
-            std::is_constructible_v<T, int>,
-            "BST::randomIntTree requires that T can be constructed from int."
+    BST randomIntTree(std::size_t count, int minValue = -100, int maxValue = 100) {
+        assert(std::is_constructible_v<T, int>,
+            "Esse método exige que T possa ser construido a partir de int."
         );
-
         BST tree;
-        if (count == 0) {
+        if(count == 0){
             return tree;
         }
-
-        if (minValue > maxValue) {
+        if(minValue > maxValue){
             std::swap(minValue, maxValue);
         }
 
@@ -72,7 +69,7 @@ public:
         std::mt19937 generator(rd());
         std::uniform_int_distribution<int> distribution(minValue, maxValue);
 
-        for (std::size_t i = 0; i < count; ++i) {
+        for(std::size_t i=0; i < count; i++){
             tree.insertNode(static_cast<T>(distribution(generator)));
         }
 
@@ -80,22 +77,15 @@ public:
     }
 
     bool removeValue(const T& value) {
-        auto values = inOrder();
-        auto it = std::find(values.begin(), values.end(), value);
-        if (it == values.end()) {
-            return false;
-        }
-
-        values.erase(it);
-        clear();
-
-        for (const auto& element : values) {
-            insertNode(element);
-        }
-
-        return true;
+        bool removed = false;
+        root_ = removeRec(root_, value, removed);
+        return removed;
     }
 
+    // Executa uma busca em largura e devolve uma matriz onde cada linha representa um
+    // nivel da arvore: uma fila percorre os nos nivel a nivel, os valores visitados
+    // sao armazenados num vetor temporario que vira a linha da matriz e os filhos sao
+    // enfileirados para compor a proxima linha.
     std::vector<std::vector<T>> breadthLevels() const {
         std::vector<std::vector<T>> levels;
         if (root_ == nullptr) {
@@ -201,6 +191,39 @@ private:
         clearRec(node->right);
         delete node;
     }
+
+    BSTNode<T> removeRec(BSTNode<T>* node, const T& key, bool& removed){
+        if(!node) return nullptr;
+        if(key < node->data){
+            node->left = removeRec(node->left, key, removed);
+        }
+        else if(key > node->data){
+            node->right = removeRec(node->right, key, removed);
+        }
+        else{
+            removed = true;
+            if(!node->left){
+                BSTNode<T>* right = node->right;
+                delete node;
+                return right;
+            }
+            else if(!node->right){
+                BSTNode<T>* left = node->left;
+                delete node;
+                return left;
+            }
+            else{
+                BSTNode<T>* sucessor = node->right;
+                while(sucessor->left){
+                    sucessor = sucessor->left;
+                }
+                node->data = sucessor->data;
+                node->right = removeRec(node->right, sucessor->data, removed);
+            }
+        }
+        return node;
+    }
+
 };
 
-} // namespace dsl
+}
