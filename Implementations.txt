@@ -1,0 +1,12 @@
+Pilha X
+Fila X
+
+Listas encadeadas X
+Listas encadeadas circulares X
+Listas duplamente encadeadas X
+Listas duplamente encadeadas circulares X
+
+Busca em largura e busca em profundidade em Árvores Binárias. X
+Árvores balanceadas AVL. 
+Árvores balanceadas Rubro-Negra. 
+Tabelas de Dispersão (Tabela Hash).

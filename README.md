@@ -12,10 +12,16 @@ Inclua tudo com `#include <DataStructLib/DataStructLib.hpp>`.
 
 - `Node<T>`: nó didático de lista encadeada (usa ponteiros “brutos” de propósito).
   - Principais membros: `getInfo()`, `setInfo(...)`, `getLink()`, `setLink(...)`.
+- `DoublyNode<T>`: nó para lista duplamente encadeada (ponteiros para anterior e próximo).
+  - Principais membros: `getInfo()`, `setInfo(...)`, `getNext()`, `setNext(...)`, `getPrevious()`, `setPrevious(...)`.
 - `LinkedList<T>`: lista encadeada simples.
   - Operações: `insertStart(x)`, `insertEnd(x)`, `removeStart()`, `isEmpty()`, `clear()`, `getHead()`, `setHead(...)`.
   - Observações: lança a mensagem "Lista vazia" ao remover de lista vazia.
   - Sem cópia (copy) para evitar dupla liberação.
+- `DoublyLinkedList<T>`: lista duplamente encadeada (mantém ponteiro para cabeça e cauda).
+  - Operações: `insertStart(x)`, `insertEnd(x)`, `removeStart()`, `removeEnd()`, `isEmpty()`, `clear()`, `getHead()`, `getTail()`, `setHead(...)`, `setTail(...)`.
+- `CircularDoublyLinkedList<T>`: lista duplamente encadeada circular (ponteiro para a cauda).
+  - Operações: `insertStart(x)`, `insertEnd(x)`, `removeStart()`, `removeEnd()`, `isEmpty()`, `clear()`, `getHead()`, `getTail()`.
 - `Stack<T>`: pilha (LIFO) construída sobre `LinkedList<T>`.
   - Operações: `push(x)`, `pop()`, `isEmpty()`.
 - `Queue<T>`: fila (FIFO) construída sobre `LinkedList<T>`.

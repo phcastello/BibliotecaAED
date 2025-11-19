@@ -3,14 +3,14 @@
 Este arquivo lista, em alto nível, as próximas implementações previstas para a biblioteca, seguindo o foco didático do projeto. A ordem é aproximada e pode mudar conforme necessidades de aula/exercícios.
 
 ## Listas
-- [ ] Lista encadeada circular (simples)
-- [ ] Lista duplamente encadeada
-- [ ] Lista duplamente encadeada circular
+- [X] Lista encadeada circular (simples)
+- [X] Lista duplamente encadeada
+- [X] Lista duplamente encadeada circular
 
 ## Árvores
-- [ ] Árvore Binária de Busca (BST)
+- [X] Árvore de Busca Binária (BST)
 - [ ] Percursos/Buscas em Árvores Binárias
-  - [ ] Busca em profundidade (DFS: pré‑ordem, em‑ordem, pós‑ordem)
+  - [X] Busca em profundidade (DFS: pré‑ordem, em‑ordem, pós‑ordem)
   - [ ] Busca em largura (BFS: por níveis)
 - [ ] Árvores balanceadas AVL
 - [ ] Árvores balanceadas Rubro‑Negra
@@ -26,4 +26,3 @@ Este arquivo lista, em alto nível, as próximas implementações previstas para
 - Tratamento de erros mínimo e pedagógico, com mensagens claras.
 
 Contribuições, sugestões de escopo e exemplos de uso são bem‑vindos.
-

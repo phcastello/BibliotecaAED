@@ -27,6 +27,9 @@ public:
 
     void insertNode(const T& data) { root_ = insertNodeRec(root_, data); }
 
+
+    // DFS Transversais da arvore que usam
+    // métodos auxiliares recursivos privados
     std::vector<T> inOrder() const {
         std::vector<T> ordered;
         inOrderRec(root_, ordered);
