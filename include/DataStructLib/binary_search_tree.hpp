@@ -23,6 +23,13 @@ public:
     BSTNode<T>* getRoot() { return root_; }
     const BSTNode<T>* getRoot() const { return root_; }
 
+    int getHeight(const BSTNode<T>* node) const {return node ? node->height : -1;}
+    void setHeight(BSTNode<T>* node){
+        if(node){
+            node->height = 1 + std::max(getHeight(node->left),getHeight(node->right));
+        }
+    }
+
     bool isEmpty() const { return root_ == nullptr; }
 
     void insertNode(const T& data) { root_ = insertNodeRec(root_, data); }
@@ -142,7 +149,7 @@ private:
         else if (data > node->data) {
             node->right = insertNodeRec(node->right, data);
         }
-
+        setHeight(node);
         return node;
     }
 
@@ -224,6 +231,7 @@ private:
                 node->right = removeRec(node->right, sucessor->data, removed);
             }
         }
+        setHeight(node);
         return node;
     }
 

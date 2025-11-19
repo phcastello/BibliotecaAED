@@ -11,7 +11,7 @@ Este arquivo lista, em alto nível, as próximas implementações previstas para
 - [X] Árvore de Busca Binária (BST)
 - [ ] Percursos/Buscas em Árvores Binárias
   - [X] Busca em profundidade (DFS: pré‑ordem, em‑ordem, pós‑ordem)
-  - [ ] Busca em largura (BFS: por níveis)
+  - [X] Busca em largura (BFS: por níveis)
 - [ ] Árvores balanceadas AVL
 - [ ] Árvores balanceadas Rubro‑Negra
 
